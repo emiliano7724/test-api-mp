@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebhooksController;
+use App\Http\Controllers\PagoController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,3 +19,4 @@ Route::get('/', function () {
 });
 
 Route::post('webhooks', WebhooksController::class)->name('webhooks');
+Route::get('success/pay', [PagoController::class,'successPay'])->name('returnPagoExitoso');
