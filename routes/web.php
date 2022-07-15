@@ -19,4 +19,5 @@ Route::get('/', function () {
 });
 
 Route::post('webhooks', WebhooksController::class)->name('webhooks');
-Route::get('success/pay', [PagoController::class,'successPay'])->name('returnPagoExitoso');
+Route::get('success/pay', [PagoController::class,'successPayMP'])->name('returnPagoExitosoMP');
+Route::get('preparar/pago', [PagoController::class,'prepararPago'])->name('prepararPago');

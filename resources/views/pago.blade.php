@@ -1,26 +1,5 @@
 <!DOCTYPE html>
-        @php
-        // SDK de Mercado Pago
-        require base_path('/vendor/autoload.php');
-        // Agrega credenciales
-        MercadoPago\SDK::setAccessToken(config('services.mercadopago.token'));
-
-        // Crea un objeto de preferencia
-        $preference = new MercadoPago\Preference();
-        $preference->back_urls = array(
-    "success" => route('returnPagoExitosoMP'),
-    "failure" => "http://www.tu-sitio/failure",
-    "pending" => "http://www.tu-sitio/pending"
-);
-$preference->auto_return = "approved";
-        // Crea un ítem en la preferencia
-        $item = new MercadoPago\Item();
-        $item->title = 'Mi producto';
-        $item->quantity = 1;
-        $item->unit_price = 75.56;
-        $preference->items = [$item];
-        $preference->save();
-        @endphp
+       
 
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -38,7 +17,7 @@ $preference->auto_return = "approved";
 
 <body class="antialiased">
 
-    <h1>Prueba integracion Checkout pro Mercado pago</h1>
+    <h1>Prueba integracion Checkout pro Mercado pago v1</h1>
 
     <div class="cho-container">
 
@@ -49,7 +28,7 @@ $preference->auto_return = "approved";
 
 <script>
     // Agrega credenciales de SDK
-    const mp = new MercadoPago("{{config('services.mercadopago.key')}}", {
+    const mp = new MercadoPago("{{$key}}", {
       locale: "es-AR",
     });
   
