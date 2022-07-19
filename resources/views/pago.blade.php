@@ -16,6 +16,7 @@
 </head>
 
 <body class="antialiased">
+ 
 
     <h1>Prueba integracion Checkout pro Mercado pago v1</h1>
 

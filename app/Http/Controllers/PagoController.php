@@ -14,38 +14,23 @@ use App\Models\Plataforma;
 use App\Models\Estado;
 use Illuminate\Support\Facades\DB;
 use App\Models\ItemPago;
+use MercadoPago\Payer;
 
 class PagoController extends Controller
 {
 
     public function prepararPago(Request $request)
     {
-         $data = [
-            "id_cliente_api_pago" => 1,  // este ID identifica a BASA en este caso ver donde podria estas guardado
-            "id_plataforma_pago" => 1, // MP
-            "items" => [
-                [
-                    "title" => "Reserva de turno",
-                    "quantity" => 5,
-                    "unit_price" => 11,
-                    "description" =>"description",
-                    "category_id" => null,
-                    "picture_url" => null,
-                    "currency_id" => null
-                ],
-                 ]
-        ];
-       
-        //$data= (object)$data; 
-        $data = (object)$data;
     
+        $data= (object)$request->all(); 
+
         switch ($data->id_plataforma_pago) {
             case 1: //MERCADO PAGO -- id de la tabla plataformas
                 //con el id del cliente buscamos su token de mercado pago y su key
                 $credenciales = Cliente::select('token_mp', 'key_mp')
                     ->where('id', $data->id_cliente_api_pago)
                     ->first();
-       
+
                 SDK::setAccessToken($credenciales->token_mp);
 
                 // Crea un objeto de preferencia
@@ -56,8 +41,8 @@ class PagoController extends Controller
                     "failure" => "http://www.tu-sitio/failure",
                     "pending" => "http://www.tu-sitio/pending"
                 );
-             
-            
+
+
                 $preference->auto_return = "approved";
                 // Crea un ítem en la preferencia
 
@@ -75,15 +60,30 @@ class PagoController extends Controller
                 }
 
                 $preference->items = $arrayItems;
+                //seteamos los datos del comprador
+                $payer = new Payer();
+                $payer->name = $data->comprador['nombre'];
+                $payer->surname = $data->comprador['apellido'];
+                $payer->email = $data->comprador['email'];
+                $payer->date_created = Carbon::now();
+                $payer->phone =  $data->comprador['telefono'];
+                $payer->identification =  $data->comprador['identificacion'];
+                $payer->address =  $data->comprador['direccion'];
+                // Fin set Comprador
+                $preference->payer=$payer;
                 $preference->save();
-    
-                $key = $credenciales->key_mp;
 
-/* return json_encode($preference);
-                return response()->json($preference); */
-            //  return response()->json(['preference'=>json_decode(json_encode($preference))]);
-             //   return response()->json(['preference'=>$preference]);
-                return view('pago', compact('preference', 'key'));
+                $key = $credenciales->key_mp;
+              
+                $endpoint = config('constants.API_PREFERENCE') . $preference->id . "?access_token=" . config('constants.MP_ACCESS_TOKEN');
+
+                $res = Http::get($endpoint)->json();
+    
+                $resObject = (object) $res;
+               
+                return response()->json(['preference'=>json_decode(json_encode($resObject)),'key'=>$key]);
+
+               // return view('pago', compact('preference', 'key'));
                 break;
         }
     }
@@ -130,8 +130,8 @@ class PagoController extends Controller
             //ver si esto deberia hacerle el cliente del api y no la api
             $items = $resObject->additional_info['items'];
             foreach ($items as $i) {
-                $i=(object)$i;
-             
+                $i = (object)$i;
+
                 ItemPago::create(
                     [
                         'id_pago' => $pago->id,
@@ -141,7 +141,7 @@ class PagoController extends Controller
                         'description' => $i->description,
                         'category_id' => $i->category_id,
                         'picture_url' => $i->picture_url,
-                     
+
                     ]
                 );
             }
