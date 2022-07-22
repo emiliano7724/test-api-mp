@@ -4,25 +4,41 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use MercadoPago\SDK;
-use MercadoPago\Preference;
-use MercadoPago\Item;
-use App\Models\Cliente;
 use App\Models\Pago;
 use Illuminate\Support\Carbon;
 use App\Models\Plataforma;
 use App\Models\Estado;
 use Illuminate\Support\Facades\DB;
 use App\Models\ItemPago;
-use MercadoPago\Payer;
+use App\Pagos\PagoFactory;
 
 class PagoController extends Controller
 {
+    public function preparePay(Request $request)
+    {
 
+        $data = (object)$request->all();
+        $pago = (new PagoFactory(app()))->create($data->name_plataforma_pago);
+
+        return $pago->preparePay($data);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 
     public function prepararPago(Request $request)
     {
-    
-        $data= (object)$request->all(); 
+
+        $data = (object)$request->all();
 
         switch ($data->id_plataforma_pago) {
             case 1: //MERCADO PAGO -- id de la tabla plataformas
@@ -70,23 +86,23 @@ class PagoController extends Controller
                 $payer->identification =  $data->comprador['identificacion'];
                 $payer->address =  $data->comprador['direccion'];
                 // Fin set Comprador
-                $preference->payer=$payer;
+                $preference->payer = $payer;
                 $preference->save();
 
                 $key = $credenciales->key_mp;
-              
+
                 $endpoint = config('constants.API_PREFERENCE') . $preference->id . "?access_token=" . config('constants.MP_ACCESS_TOKEN');
 
                 $res = Http::get($endpoint)->json();
-    
-                $resObject = (object) $res;
-               
-                return response()->json(['preference'=>json_decode(json_encode($resObject)),'key'=>$key]);
 
-               // return view('pago', compact('preference', 'key'));
+                $resObject = (object) $res;
+
+                return response()->json(['preference' => json_decode(json_encode($resObject)), 'key' => $key]);
+
+                // return view('pago', compact('preference', 'key'));
                 break;
         }
-    }
+    } */
 
     public function successPayMP(Request $request)
     {

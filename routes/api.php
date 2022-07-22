@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('preparar/pago', [PagoController::class,'prepararPago']);
+Route::post('prepare/pay', [PagoController::class,'preparePay']);
